@@ -1,0 +1,55 @@
+# ================================================
+# docker-compose.yml — Mini Chat v2.0
+# ================================================
+# Cách dùng:
+#   docker-compose up      (chạy, xem log)
+#   docker-compose up -d   (chạy nền)
+#   docker-compose down    (dừng)
+#   docker-compose logs -f (xem log realtime)
+# ================================================
+
+version: '3.8'
+
+services:
+
+  # -------- SERVER --------
+  minichat-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minichat-server-v2
+
+    # Map cổng: <máy thật>:<container>
+    ports:
+      - "6789:6789"
+
+    # Lưu data ra ngoài container
+    volumes:
+      - db-data:/app/data      # Database files
+      - ./logs:/app/logs        # Log files (dễ đọc từ máy host)
+
+    # Cấu hình qua biến môi trường
+    environment:
+      - SERVER_PORT=6789
+      - SERVER_THREAD_POOL_SIZE=50
+      - DB_URL=jdbc:h2:/app/data/minichat_db;AUTO_SERVER=TRUE
+      - DB_USER=sa
+      - DB_PASSWORD=
+
+    # Tự restart nếu crash
+    restart: unless-stopped
+
+    # Kiểm tra sức khỏe
+    healthcheck:
+      test: ["CMD-SHELL",
+             "nc -z localhost 6789 && echo 'healthy' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+# -------- VOLUMES --------
+volumes:
+  db-data:
+    name: minichat-v2-db
+    driver: local

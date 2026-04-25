@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--
+        LOGBACK CONFIGURATION — Mini Chat v2.0
+        
+        File này điều khiển cách ghi log của toàn bộ ứng dụng.
+        
+        Có 2 nơi log được ghi:
+        1. CONSOLE: Hiển thị ra màn hình Eclipse/Terminal
+        2. FILE: Ghi vào file logs/minichat.log
+    -->
+
+    <!-- ============ CONSOLE APPENDER ============ -->
+    <!-- Ghi log ra màn hình với màu sắc dễ đọc -->
+    <appender name="CONSOLE"
+              class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--
+                Format: [Giờ:Phút:Giây] [LEVEL] TênClass - Nội dung
+                Ví dụ: [14:32:05] [INFO ] ChatServer - Server started
+            -->
+            <pattern>
+                [%d{HH:mm:ss}] [%-5level] %-25logger{25} - %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ============ FILE APPENDER ============ -->
+    <!-- Ghi log vào file, tự động tạo file mới mỗi ngày -->
+    <appender name="FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <!-- Tên file log hiện tại -->
+        <file>logs/minichat.log</file>
+
+        <!-- Chính sách xoay vòng: tạo file mới mỗi ngày -->
+        <rollingPolicy
+            class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                logs/minichat.%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <!-- Giữ log tối đa 7 ngày -->
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>
+                %d{yyyy-MM-dd HH:mm:ss} [%-5level] %logger - %msg%n
+            </pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- ============ LOGGER CHO DATABASE ============ -->
+    <!-- DatabaseManager chỉ log WARNING trở lên -->
+    <!-- Tránh spam console với mỗi lần insert -->
+    <logger name="server.DatabaseManager"
+            level="WARN"
+            additivity="false">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- ============ ROOT LOGGER ============ -->
+    <!-- Tất cả các class khác: log từ INFO trở lên -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</configuration>
